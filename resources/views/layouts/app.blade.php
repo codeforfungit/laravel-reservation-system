@@ -15,7 +15,7 @@
     <link href="{{ asset('css/combined.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
+    <div>
         <nav class="navbar navbar-default navbar-static-top">
             <div class="container">
                 <div class="navbar-header">
@@ -53,6 +53,7 @@
                                 </a>
 
                                 <ul class="dropdown-menu" role="menu">
+                                    <li><a href="{{ route('reservations') }}">預約紀錄</a></li>
                                     <li>
                                         <a href="{{ route('logout') }}"
                                             onclick="event.preventDefault();
@@ -72,7 +73,9 @@
             </div>
         </nav>
 
-        @yield('content')
+        <div id="app">
+            @yield('content')
+        </div>
     </div>
 
     <!-- Scripts -->

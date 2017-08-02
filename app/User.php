@@ -26,4 +26,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function reservations () {
+        return $this->hasMany('App\Reservation');
+    }
+
+    public function reserve (Reservation $reservation) {
+        return $this->reservations()->save($reservation);
+    }
 }

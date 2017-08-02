@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
+use App\Reservation;
 use App\Classroom;
 use App\Plan;
 
@@ -16,7 +18,15 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        //
+        if (auth()->check()) {
+            $reservations = auth()->user()
+                ->reservations()
+                ->orderBy('start', 'asc')
+                ->get();
+            return view('reservations.index', compact('reservations'));
+        } else {
+            return;
+        }
     }
 
     /**
@@ -24,11 +34,15 @@ class ReservationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create($id)
+    public function create($planId)
     {
-        $plan = Plan::findOrFail($id);
+        $plan = Plan::findOrFail($planId);
         $classroom = $plan->classroom;
-        return view('reservations.create', compact('classroom', 'plan'));
+        $reservations = $plan->reservations()
+            ->where('start', '>', time())
+            ->pluck('start');
+        
+        return view('reservations.create', compact('classroom', 'plan', 'reservations'));
     }
 
     /**
@@ -37,9 +51,24 @@ class ReservationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store($planId)
     {
-        //
+        if (auth()->check())
+        {
+            $reservation = auth()->user()->reserve(new Reservation([
+                'plan_id' => $planId,
+                'start' => Carbon::createFromTimestamp(request('start')),
+                'end' => Carbon::createFromTimestamp(request('end'))
+            ]));
+            
+            return response()->json([
+                'reservation' => $reservation,
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'did not login'
+            ]);
+        }        
     }
 
     /**

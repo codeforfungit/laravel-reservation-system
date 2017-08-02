@@ -5,20 +5,22 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-require('./bootstrap');
-require('./php-date-formatter.min.js');
-require('./jquery.datetimepicker.min.js');
+require('./bootstrap')
+require('./php-date-formatter.min.js')
+require('./jquery.datetimepicker.min.js')
+var Element = require('element-ui')
 
-window.Vue = require('vue');
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
+window.Vue = require('vue')
 
-Vue.component('example', require('./components/Example.vue'));
+// Vue add-on
+window.Vue.prototype.$http = window.axios
+window.Vue.use(Element)
+
+// Vue components
+Vue.component('example', require('./components/Example.vue'))
+Vue.component('reservation', require('./components/Reservation.vue'))
 
 const app = new Vue({
     el: '#app'
-});
+})

@@ -64,7 +64,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'asia/taipei',
 
     /*
     |--------------------------------------------------------------------------
@@ -176,6 +176,9 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
+        // custom service providers
+        TCG\Voyager\VoyagerServiceProvider::class,
 
     ],
 

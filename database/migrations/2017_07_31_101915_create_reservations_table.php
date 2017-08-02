@@ -19,9 +19,13 @@ class CreateReservationsTable extends Migration
             $table->integer('plan_id');
             $table->dateTime('start');
             $table->dateTime('end');
+            
+            // pending, confirmed
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
 
+        // 若是想要一次預約多個時段
         // Schema::create('reserved_times', function (Blueprint $table) {
         //     $table->increments('id');
         //     $table->integer('reservation_id');

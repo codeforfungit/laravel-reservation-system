@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-12">
             <h1>{{ $classroom->name }}</h1>
-            <p>{{ $classroom->introduction }}</p>
+            <p>{!! $classroom->introduction !!}</p>
             <ul class="list-group">
                 @foreach($plans as $plan)
                 <div class="panel panel-info">
@@ -19,7 +19,7 @@
                         <a href="{{ route('createReservation', $plan->id) }}" class="btn btn-default">預約</a>
                     </div>
                 </div>
-              @endforeach
+                @endforeach
             </ul>
         </div>
     </div>

@@ -23,4 +23,10 @@ Route::get('/classrooms', 'ClassroomController@index')->name('classrooms');
 
 Route::get('/classrooms/{id}', 'ClassroomController@show')->name('showClassroom');
 
-Route::get('/reserve/{id}', 'ReservationController@create')->name('createReservation');
+Route::get('/reservations', 'ReservationController@index')->middleware('auth')->name('reservations');
+Route::get('/reservations/{planId}/create', 'ReservationController@create')->middleware('auth')->name('createReservation');
+Route::post('/reservations/{planId}', 'ReservationController@store')->middleware('auth');
+
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+});
