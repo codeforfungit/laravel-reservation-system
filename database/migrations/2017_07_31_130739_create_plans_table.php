@@ -16,9 +16,13 @@ class CreatePlansTable extends Migration
         Schema::create('plans', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->integer('classroom_id');
+            $table->integer('classroom_id')->unsigned();
+            $table->foreign('classroom_id')
+                ->references('id')->on('classrooms')
+                ->onDelete('restrict');
             $table->integer('price');
             $table->text('introduction');
+            $table->json('exclusive_ids')->nullable();
             $table->timestamps();
         });
     }
