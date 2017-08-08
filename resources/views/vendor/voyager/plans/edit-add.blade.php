@@ -72,6 +72,19 @@
                                 </div>
                             @endforeach
 
+                            {{-- 方案互斥設定 --}}
+                            <h4>方案互斥設定(若有變更教室設定請先儲存)</h4>
+                            <div class="checkbox">
+                            <?php $exclusiveIdArray = json_decode($dataTypeContent->exclusive_ids); ?>
+                            @foreach($exclusivePlans as $exclusivePlan)
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="exclusive_ids[]" 
+                                        value="{{ $exclusivePlan->id }}" 
+                                        @if(is_array($exclusiveIdArray) && in_array($exclusivePlan->id, $exclusiveIdArray)) checked @endif>{{ $exclusivePlan->name }}
+                                </label>
+                            @endforeach
+                            </div>
+
                         </div><!-- panel-body -->
 
                         <div class="panel-footer">

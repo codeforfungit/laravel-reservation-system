@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\DB;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 
-class ClassroomController extends Controller
+use App\Plan;
+
+class PlanController extends Controller
 {
     use BreadRelationshipParser;
     //***************************************
@@ -151,10 +153,11 @@ class ClassroomController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        // GET THE plans DataType
-        $planDataType = Voyager::model('DataType')->where('model_name', '=', 'App\Plan')->first();
-        
-        return view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'planDataType'));
+        $exclusivePlans = Plan::where('id', '!=', $id)
+                                ->where('classroom_id', $dataTypeContent->classroom_id)
+                                ->get();
+
+        return view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'exclusivePlans'));
     }
 
     // POST BR(E)AD
@@ -167,18 +170,23 @@ class ClassroomController extends Controller
         // Check permission
         Voyager::canOrFail('edit_'.$dataType->name);
 
+        // Added by Shingo
+        // Change the exclusive_ids from array to json value
+        $exclusive_ids = json_encode(request('exclusive_ids'), JSON_NUMERIC_CHECK);
+        $request->merge(['exclusive_ids' => $exclusive_ids]);
+        
         //Validate fields with ajax
         $val = $this->validateBread($request->all(), $dataType->editRows);
 
         if ($val->fails()) {
             return response()->json(['errors' => $val->messages()]);
         }
-
+        
         if (!$request->ajax()) {
             $data = call_user_func([$dataType->model_name, 'findOrFail'], $id);
 
             $this->insertUpdateData($request, $slug, $dataType->editRows, $data);
-
+            
             return redirect()
             ->route("voyager.{$dataType->slug}.edit", ['id' => $id])
             ->with([

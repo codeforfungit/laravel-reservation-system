@@ -120,11 +120,6 @@
                                         <i class="voyager-edit"></i> <span class="hidden-xs hidden-sm">Edit</span>
                                     </a>
                                 @endif
-                                @if (Voyager::can('read_'.$planDataType->name))
-                                    <a href="{{ route('voyager.'.$planDataType->slug.'.show', $plan->id) }}" title="View" class="btn btn-sm btn-warning pull-right">
-                                        <i class="voyager-eye"></i> <span class="hidden-xs hidden-sm">View</span>
-                                    </a>
-                                @endif
                             </td>
                         </tr>
                     @endforeach

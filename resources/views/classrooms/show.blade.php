@@ -13,7 +13,7 @@
                         <h3 class="panel-title">{{ $plan->name }}</h3>
                     </div>
                     <div class="panel-body">
-                        {{ $plan->introduction }}
+                        {!! $plan->introduction !!}
                     </div>
                     <div class="panel-footer">
                         <a href="{{ route('createReservation', $plan->id) }}" class="btn btn-default">預約</a>

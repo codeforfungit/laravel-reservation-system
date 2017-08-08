@@ -38,10 +38,25 @@ class ReservationController extends Controller
     {
         $plan = Plan::findOrFail($planId);
         $classroom = $plan->classroom;
+        
+        // 取出已被預約時段
         $reservations = $plan->reservations()
             ->where('start', '>', time())
             ->pluck('start');
+
+        // 將互斥的方案預約時段加入
+        $exclusivePlanIdArray = json_decode($plan->exclusive_ids);
+        if(is_array($exclusivePlanIdArray) && count($exclusivePlanIdArray)>0 ){
+            foreach($exclusivePlanIdArray as $exclusivePlanId) {
+                $exclusivePlan = Plan::find($exclusivePlanId);
+                $exclusiveReservations = $exclusivePlan->reservations()
+                                            ->where('start', '>', time())
+                                            ->pluck('start');
+                $reservations = $reservations->merge($exclusiveReservations);
+            }
+        }
         
+        \Debugbar::info(compact('classroom', 'plan', 'reservations'));
         return view('reservations.create', compact('classroom', 'plan', 'reservations'));
     }
 
