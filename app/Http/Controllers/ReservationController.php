@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Reservation;
 use App\Classroom;
 use App\Plan;
+use App\Equipment;
 
 class ReservationController extends Controller
 {
@@ -44,6 +45,8 @@ class ReservationController extends Controller
             ->where('start', '>', time())
             ->pluck('start');
 
+        $equipment = Equipment::all();
+
         // 將互斥的方案預約時段加入
         $exclusivePlanIdArray = json_decode($plan->exclusive_ids);
         if(is_array($exclusivePlanIdArray) && count($exclusivePlanIdArray)>0 ){
@@ -57,7 +60,7 @@ class ReservationController extends Controller
         }
         
         \Debugbar::info(compact('classroom', 'plan', 'reservations'));
-        return view('reservations.create', compact('classroom', 'plan', 'reservations'));
+        return view('reservations.create', compact('classroom', 'plan', 'reservations', 'equipment'));
     }
 
     /**
@@ -70,14 +73,26 @@ class ReservationController extends Controller
     {
         if (auth()->check())
         {
+            $plan = Plan::find($planId);
+            $equipment = Equipment::find(request('equipment'));
+            
+            $price = 0;
+            foreach ($equipment as $item) {
+                $price += $item->price;
+            }
+            $price += $plan->price;
+
             $reservation = auth()->user()->reserve(new Reservation([
                 'plan_id' => $planId,
+                'price' => $price,
                 'start' => Carbon::createFromTimestamp(request('start')),
                 'end' => Carbon::createFromTimestamp(request('end'))
             ]));
+
+            $reservation->equipment()->attach(request('equipment'));
             
             return response()->json([
-                'reservation' => $reservation,
+                'reservation' => $reservation
             ]);
         } else {
             return response()->json([

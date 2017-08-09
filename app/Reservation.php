@@ -9,7 +9,8 @@ class Reservation extends Model
     protected $fillable = [
         'plan_id',
         'start',
-        'end'
+        'end',
+        'price'
     ];
 
     public function user () {
@@ -22,5 +23,9 @@ class Reservation extends Model
 
     public function classroom () {
         return $this->plan->classroom;
+    }
+
+    public function equipment () {
+        return $this->belongsToMany('App\Equipment');
     }
 }

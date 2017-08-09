@@ -5,6 +5,7 @@
         <div class="jumbotron">
           <h1>教室: {{ classroom.name }}</h1>
           <p>方案: {{ plan.name }}</p>
+          <p>費用: {{ plan.price }}</p>
         </div>
       </div>
   </div>
@@ -20,7 +21,17 @@
         :picker-options="pickerOptions">
       </el-date-picker>
       <a v-if="selectedSectionIndex !== null" class="btn btn-primary">{{ selectedSection.text }}</a>
-      <a @click="sendReserve" v-if="reservedStartDateTime && reservedEndDateTime" class="btn btn-default">送出預約</a>
+    </div>
+
+    <div class=block>
+      <el-checkbox-group v-model="checkedEquipment">
+        <el-checkbox v-for="equipment in equipmentOptions" :label="equipment.id" :key="equipment.id">{{ equipment.name + '(' + equipment.price + ')' }}</el-checkbox>
+      </el-checkbox-group>
+    </div>
+
+    <div class=block v-if="reservedStartDateTime && reservedEndDateTime">
+      <span>價格預估: {{ estimated }}</span>
+      <a @click="sendReserve" class="btn btn-default">送出預約</a>
     </div>
   </div>
 
@@ -29,9 +40,10 @@
 
 <<script>
 export default {
-  props: ['classroom', 'plan', 'reservations'],
+  props: ['classroom', 'plan', 'reservations', 'equipment'],
 
   mounted () {
+    // 設定可預約時段
     this.sections = [{
       text: '早上(10:00~12:00)',
       startTime: 10,
@@ -61,6 +73,21 @@ export default {
       }],
       disabledDate: this.disabledDate
     }
+
+    // 設定設備清單
+    var tempArray = []
+    this.equipment.forEach(item => {
+      // this.equipmentOptions.names.push(item.name)
+      // this.equipmentOptions.prices.push(item.price)
+      // this.equipmentOptions.keys.push(item.id)
+      tempArray.push({
+        name: item.name,
+        price: item.price,
+        id: item.id
+      })
+    })
+    this.equipmentOptions = tempArray
+
   },
 
   data () {
@@ -69,10 +96,19 @@ export default {
       pickerOptions: {},
       reservedDate: null,
       selectedSectionIndex: null,
+      equipmentOptions: [],
+      checkedEquipment: []
     }
   },
 
   computed: {
+    estimated () {
+      var equipmentEstimate = 0;
+      this.checkedEquipment.forEach(id => {
+        equipmentEstimate += this.equipmentOptions.find(equipment => { return equipment.id === id }).price
+      })
+      return this.plan.price + equipmentEstimate
+    },
     selectedSection () {
       if (this.selectedSectionIndex !== null) {
         return this.sections[this.selectedSectionIndex]
@@ -121,8 +157,10 @@ export default {
     sendReserve () {
       this.$http.post('/reservations/' + this.plan.id, {
         start: this.reservedStartDateTime,
-        end: this.reservedEndDateTime
+        end: this.reservedEndDateTime,
+        equipment: this.checkedEquipment
       }).then(res => {
+        // console.log(res)
         window.location.href = '/reservations';
       }).catch(err => {
         console.error(err)

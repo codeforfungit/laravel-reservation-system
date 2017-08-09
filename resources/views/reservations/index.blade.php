@@ -15,7 +15,9 @@
             <th>#</th>
             <th>教室</th>
             <th>方案</th>
+            <th>設備</th>
             <th>預約時段</th>
+            <th>費用</th>
             <th>狀態</th>
           </tr>
 
@@ -25,7 +27,16 @@
             <td>{{ $key+1 }}</td>
             <td><a href="{{ route('showClassroom', $reservation->plan->classroom->id) }}">{{ $reservation->plan->classroom->name }}</a></td>
             <td><a href="{{ route('createReservation', $reservation->plan->id) }}">{{ $reservation->plan->name }}</a></td>
+            <td>
+              @foreach($reservation->equipment as $key=>$equipment)
+                @if($key > 0)
+                  /
+                @endif
+                <span>{{ $equipment->name }}</span>
+              @endforeach
+            </td>
             <td>{{ $reservation->start }}</td>
+            <td>{{ $reservation->price }}</td>
             <td>{{ $reservation->status }}</td>
           </tr>
           @endforeach
