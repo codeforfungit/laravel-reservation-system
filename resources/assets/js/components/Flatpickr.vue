@@ -95,7 +95,7 @@ export default {
         this.deleteVocation(vocation.id)
       } else {
         // console.log('尚未選過, 加入到假日')
-        this.addVocation(dateStr + ' 00:00:00')
+        this.addVocation(dateStr + ' 00:00:00', dateStr + ' 23:59:59')
       }
     },
 
@@ -115,13 +115,11 @@ export default {
       })
     },
 
-    addVocation (dateStr) {
+    addVocation (start, end) {
       this.isLoading = true
-      console.log('addVocation to ' + this.breadurl)
-      console.log(dateStr)
       this.$http.post(this.breadurl, {
-        start: dateStr,
-        end: dateStr
+        start,
+        end
       }).then(res => {
         // post成功後加入月曆中
         this.vocations.push({

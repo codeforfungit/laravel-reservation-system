@@ -40,9 +40,10 @@
 
 <<script>
 export default {
-  props: ['classroom', 'plan', 'reservations', 'equipment'],
+  props: ['classroom', 'plan', 'reservations', 'vocations', 'equipment'],
 
   mounted () {
+    console.log(this.vocations)
     // 設定可預約時段
     this.sections = [{
       text: '早上(10:00~12:00)',
@@ -142,14 +143,21 @@ export default {
       return function (picker) {
         self.selectedSectionIndex = sectionIndex
         picker.disabledDate = function (date) {
+          var dateWithHour = date.setHours(self.selectedSection.startTime)
 
           // 找出是否有被預約
           var isReserved = self.reservations.some(reservationTimeString => {
-            return new Date(reservationTimeString).getTime() === date.setHours(self.selectedSection.startTime)
+            return new Date(reservationTimeString).getTime() === dateWithHour
           })
 
-          return isReserved || 
-                 date.setHours(self.selectedSection.startTime) < new Date() // 時間已超過
+          // 是否設定為假日
+          var isVocation = self.vocations.some(vocation => {
+            return new Date(vocation.start).getTime() < dateWithHour &&
+                   dateWithHour < new Date(vocation.end).getTime()
+          })
+          
+          return isReserved || isVocation || 
+                 dateWithHour < new Date() // 時間已超過現在時間
         }
       }
     },

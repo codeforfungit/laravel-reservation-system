@@ -45,6 +45,9 @@ class ReservationController extends Controller
             ->where('start', '>', \Carbon\Carbon::now())
             ->pluck('start');
 
+        // 取出"未來"已被設定為假日的日期
+        $vocations = \App\Vocation::where('start', '>', \Carbon\Carbon::now())->get();
+
         $equipment = Equipment::all();
 
         // 將互斥的方案預約時段加入
@@ -60,7 +63,7 @@ class ReservationController extends Controller
         }
         
         \Debugbar::info(compact('classroom', 'plan', 'reservations'));
-        return view('reservations.create', compact('classroom', 'plan', 'reservations', 'equipment'));
+        return view('reservations.create', compact('classroom', 'plan', 'reservations', 'vocations', 'equipment'));
     }
 
     /**
