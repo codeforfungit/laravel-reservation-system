@@ -1,6 +1,5 @@
 // Settings for Vue
 const Element = require('element-ui')
-import vueEventCalendar from 'vue-event-calendar'
 
 window.Vue = require('vue')
 
