@@ -40,9 +40,9 @@ class ReservationController extends Controller
         $plan = Plan::findOrFail($planId);
         $classroom = $plan->classroom;
         
-        // 取出已被預約時段
+        // 取出"未來"已被預約時段
         $reservations = $plan->reservations()
-            ->where('start', '>', time())
+            ->where('start', '>', \Carbon\Carbon::now())
             ->pluck('start');
 
         $equipment = Equipment::all();

@@ -179,6 +179,7 @@ return [
 
         // custom service providers
         TCG\Voyager\VoyagerServiceProvider::class,
+        Laravel\Passport\PassportServiceProvider::class,
 
     ],
 

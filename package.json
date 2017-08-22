@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "element-ui": "^1.4.1",
-    "jquery-datetimepicker": "^2.5.4"
+    "flatpickr": "^3.0.7",
+    "vue-event-calendar": "^1.4.6",
+    "vue-simple-spinner": "^1.2.5"
   }
 }
