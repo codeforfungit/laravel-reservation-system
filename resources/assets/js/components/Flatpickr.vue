@@ -46,14 +46,11 @@ export default {
     console.log(this.vocationCollections)
     this.vocationCollections.forEach(vocation => {
       // 設定單一日期為假日
-      if (vocation.start === vocation.end) {
-        this.vocations.push({
-          start: (new Date(vocation.start)).toDateString(),
-          id: vocation.id
-        })
-      } else {
-        // 目前不支援日期區段的假日設定
-      }
+      this.vocations.push({
+        start: (new Date(vocation.start)).toDateString(),
+        id: vocation.id
+      })
+      // ps. 目前不支援日期區段的假日設定
     })
 
     // 從Server拿回的預約資料, 設定進日曆中為不得選擇
