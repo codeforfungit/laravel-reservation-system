@@ -1,9 +1,7 @@
 <template>
 <div>
+  <el-alert title="成功提示的文案" type="success" show-icon></el-alert>
   <input id="flatpickr" class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." readonly="readonly">
-  <div v-if="isLoading" class="mask">
-    <spinner message="Loading..."></spinner>
-  </div>
 </div>
 </template>
 
@@ -43,7 +41,6 @@ export default {
     this.options.minDate = "today"
 
     // 從Server拿回的假期資料設定進日曆中預選取
-    console.log(this.vocationCollections)
     this.vocationCollections.forEach(vocation => {
       // 設定單一日期為假日
       this.vocations.push({
@@ -78,8 +75,7 @@ export default {
 
       flatPickr: null,
       reservationDateSet: new Set(),
-      vocations: [],
-      isLoading: false
+      vocations: []
     }
   },
 
@@ -98,8 +94,7 @@ export default {
 
     onDayCreate (dObj, dStr, fp, dayElem) {
       // 為vocation增加class
-      // if(this.vocationDateStringSet.has(dayElem.dateObj.toDateString())) {
-     var vocation = this.isVocation(dayElem.dateObj.toDateString())
+      var vocation = this.isVocation(dayElem.dateObj.toDateString())
       if (vocation) {
         dayElem.classList.add('vocation')
         dayElem.dataset.id = vocation.id
@@ -113,7 +108,7 @@ export default {
     },
 
     addVocation (start, end) {
-      this.isLoading = true
+      let loadingInstance = this.startLoading()
       this.$http.post(this.breadurl, {
         start,
         end
@@ -127,13 +122,12 @@ export default {
       }).catch(err => {
         console.error(err)
       }).then(() => {
-        this.isLoading = false
+        this.stopLoading(loadingInstance)
       })
     },
 
     deleteVocation (id) {
-      this.isLoading = true
-      // this.$http.delete(this.breadurl + '/' + id)
+      let loadingInstance = this.startLoading()
       this.$http({
         method: 'delete',
         url: this.breadurl + '/' + id,
@@ -141,7 +135,6 @@ export default {
       }).then(res => {
         // 完成刪除
         // 成功後從月曆中移除
-        console.log(res)
         this.vocations = this.vocations.filter( vocation => {
           return vocation.id != id
         })
@@ -151,8 +144,20 @@ export default {
         console.error(err)
       }).then(() => {
         // finally
-        this.isLoading = false
+        this.stopLoading(loadingInstance)
       })
+    },
+
+    startLoading () {
+      return this.$loading({ 
+        fullscreen: true,
+        lock: true,
+        text: 'LOADING...',
+      })
+    },
+
+    stopLoading (loadingInstance) {
+      loadingInstance.close()
     }
   }
 }
@@ -162,21 +167,21 @@ export default {
   @import '../../css/flatpickr.css';
   
   // css for loading animation
-  .mask {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+  // .mask {
+  //   position: absolute;
+  //   left: 0;
+  //   top: 0;
+  //   width: 100%;
+  //   height: 100%;
 
-    display: -webkit-flex;
-    display:         flex;
-    -webkit-align-items: center;
-            align-items: center;
-    -webkit-justify-content: center;
-            justify-content: center;
+  //   display: -webkit-flex;
+  //   display:         flex;
+  //   -webkit-align-items: center;
+  //           align-items: center;
+  //   -webkit-justify-content: center;
+  //           justify-content: center;
 
-    background-color: white;
-    opacity: 0.85;
-  }
+  //   background-color: white;
+  //   opacity: 0.85;
+  // }
 </style>

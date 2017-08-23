@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "element-ui": "^1.4.1",
-    "flatpickr": "^3.0.7",
-    "vue-simple-spinner": "^1.2.5"
+    "flatpickr": "^3.0.7"
   }
 }

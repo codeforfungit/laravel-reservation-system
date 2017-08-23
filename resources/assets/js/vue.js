@@ -1,11 +1,14 @@
 // Settings for Vue
-const Element = require('element-ui')
-
 window.Vue = require('vue')
 
 // Vue add-on
-window.Vue.use(Element)
 
+// Element-UI
+const Element = require('element-ui')
+window.Vue.use(Element)
+import 'element-ui/lib/theme-default/index.css'
+
+// Axios
 if (!window.axios) {
     window.axios = require('axios')
     window.axios.defaults.withCredentials = true
