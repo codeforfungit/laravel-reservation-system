@@ -10,6 +10,10 @@ use App\Classroom;
 use App\Plan;
 use App\Equipment;
 
+use GuzzleHttp\Pool;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request as GuzzleRequest;
+
 class ReservationController extends Controller
 {
     /**
@@ -19,15 +23,18 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        if (auth()->check()) {
-            $reservations = auth()->user()
-                ->reservations()
-                ->orderBy('start', 'asc')
-                ->get();
-            return view('reservations.index', compact('reservations'));
-        } else {
-            return;
+        if (!auth()->check()) {
+            return [
+                'message' => 'Authorization fail.',
+                'alert-type' => 'warning'
+            ];
         }
+
+        $reservations = auth()->user()
+            ->reservations()
+            ->orderBy('start', 'asc')
+            ->get();
+        return view('reservations.index', compact('reservations'));
     }
 
     /**
@@ -74,34 +81,53 @@ class ReservationController extends Controller
      */
     public function store($planId)
     {
-        if (auth()->check())
-        {
-            $plan = Plan::find($planId);
-            $equipment = Equipment::find(request('equipment'));
-            
-            $price = 0;
-            foreach ($equipment as $item) {
-                $price += $item->price;
-            }
-            $price += $plan->price;
+        if (!auth()->check()) {
+            return [
+                'message' => 'Authorization fail.',
+                'alert-type' => 'warning'
+            ];
+        }
 
-            $reservation = auth()->user()->reserve(new Reservation([
-                'plan_id' => $planId,
-                'price' => $price,
-                'start' => Carbon::createFromTimestamp(request('start')),
-                'end' => Carbon::createFromTimestamp(request('end'))
-            ]));
+        $plan = Plan::find($planId);
+        $equipment = Equipment::find(request('equipment'));
+        
+        $price = 0;
+        foreach ($equipment as $item) {
+            $price += $item->price;
+        }
+        $price += $plan->price;
 
-            $reservation->equipment()->attach(request('equipment'));
-            
-            return response()->json([
-                'reservation' => $reservation
-            ]);
+        $reservation = auth()->user()->reserve(new Reservation([
+            'plan_id' => $planId,
+            'price' => $price,
+            'start' => Carbon::createFromTimestamp(request('start')),
+            'end' => Carbon::createFromTimestamp(request('end'))
+        ]));
+
+        if ($reservation === null) {
+            return [
+                'message' => 'Error With Making Reservation',
+                'alert-type' => 'error'
+            ];
         } else {
-            return response()->json([
-                'error' => 'did not login'
-            ]);
-        }        
+            // 增加設備至pivot table
+            $reservation->equipment()->attach(request('equipment'));
+
+            if (request()->ajax()) {
+                return [
+                    'reservation' => $reservation,
+                    'message' => 'Successfully Reserve',
+                    'alert-type' => 'success'
+                ];
+            } else {
+                return redirect()
+                    ->route('reservations')
+                    ->with([
+                        'message'    => "Successfully Reserve",
+                        'alert-type' => 'success',
+                    ]);
+            }
+        }
     }
 
     /**
@@ -147,5 +173,17 @@ class ReservationController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function paid () {
+        $client = new Client();
+        $request = new GuzzleRequest("POST", "https://hooks.slack.com/services/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",
+        [
+            "Content-Type" => "application/json; charset=utf-8"
+        ],
+        "{\"text\":\"this is a book\"}");
+
+        $response = $client->send($request);
+        return "Response HTTP : " . $response->getStatusCode();
     }
 }

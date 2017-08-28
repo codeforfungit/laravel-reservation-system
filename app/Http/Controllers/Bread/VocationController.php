@@ -260,18 +260,22 @@ class VocationController extends Controller
             return response()->json(['errors' => $val->messages()]);
         }
 
+        $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
+        
         if (!$request->ajax()) {
-            $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
-
             return redirect()
                 ->route("voyager.{$dataType->slug}.edit", ['id' => $data->id])
                 ->with([
-                        'message'    => "Successfully Added New {$dataType->display_name_singular}",
-                        'alert-type' => 'success',
-                    ]);
+                    'message'    => "Successfully Added New {$dataType->display_name_singular}",
+                    'alert-type' => 'success',
+                ]);
         } else {
-            $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
-            return $data;
+            // return $data;
+            return [
+                'vocation' => $data,
+                'message'    => "Successfully Added New {$dataType->display_name_singular}",
+                'alert-type' => 'success',
+            ];
         }
     }
 
@@ -335,7 +339,7 @@ class VocationController extends Controller
             ];
 
         if (request()->ajax()) {
-            return 'ok';
+            return $data;
         } else {
             return redirect()->route("voyager.{$dataType->slug}.index")->with($data);
         }

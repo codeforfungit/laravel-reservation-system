@@ -1,6 +1,5 @@
 <template>
 <div>
-  <el-alert title="成功提示的文案" type="success" show-icon></el-alert>
   <input id="flatpickr" class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." readonly="readonly">
 </div>
 </template>
@@ -63,7 +62,7 @@ export default {
   data () {
     return {
       options: {
-        // 取消隱藏
+        // 取消月曆隱藏
         inline: true,
 
         // 不得選擇的日期(已經被預約)
@@ -108,56 +107,64 @@ export default {
     },
 
     addVocation (start, end) {
-      let loadingInstance = this.startLoading()
+      this.$startLoading()
       this.$http.post(this.breadurl, {
         start,
         end
       }).then(res => {
         // post成功後加入月曆中
-        this.vocations.push({
-          start: (new Date(res.data.start)).toDateString(),
-          id: res.data.id
-        })
-        this.flatPickr.redraw()
+        if ((/success/i).test(res.data['alert-type'])) {
+          this.vocations.push({
+            start: (new Date(res.data.vocation.start)).toDateString(),
+            id: res.data.vocation.id
+          })
+          this.flatPickr.redraw()
+          this.$message({
+            message: res.data.message,
+            type: res.data['alert-type']
+          })
+        } else {
+          throw { message: res.data.message }
+        }
       }).catch(err => {
         console.error(err)
+        this.$message({
+          message: err.message,
+          type: 'error'
+        })
       }).then(() => {
-        this.stopLoading(loadingInstance)
+        this.$stopLoading()
       })
     },
 
     deleteVocation (id) {
-      let loadingInstance = this.startLoading()
-      this.$http({
-        method: 'delete',
-        url: this.breadurl + '/' + id,
-        data: {ajax: true}
-      }).then(res => {
+      this.$startLoading()
+      this.$http.delete(this.breadurl + '/' + id)
+      .then(res => {
         // 完成刪除
         // 成功後從月曆中移除
-        this.vocations = this.vocations.filter( vocation => {
-          return vocation.id != id
-        })
-        this.flatPickr.redraw()
+        if ((/success/i).test(res.data['alert-type'])) {
+          this.vocations = this.vocations.filter( vocation => {
+            return vocation.id != id
+          })
+          this.flatPickr.redraw()
+          this.$message({
+            message: res.data.message,
+            type: res.data['alert-type']
+          })
+        } else {
+          throw { message: res.data.message }
+        }
       }).catch(err => {
         // 刪除失敗
         console.error(err)
+        this.$message({
+          message: err.message,
+          type: 'error'
+        })
       }).then(() => {
-        // finally
-        this.stopLoading(loadingInstance)
+        this.$stopLoading()
       })
-    },
-
-    startLoading () {
-      return this.$loading({ 
-        fullscreen: true,
-        lock: true,
-        text: 'LOADING...',
-      })
-    },
-
-    stopLoading (loadingInstance) {
-      loadingInstance.close()
     }
   }
 }
@@ -165,23 +172,4 @@ export default {
 
 <style lang="scss" scoped>
   @import '../../css/flatpickr.css';
-  
-  // css for loading animation
-  // .mask {
-  //   position: absolute;
-  //   left: 0;
-  //   top: 0;
-  //   width: 100%;
-  //   height: 100%;
-
-  //   display: -webkit-flex;
-  //   display:         flex;
-  //   -webkit-align-items: center;
-  //           align-items: center;
-  //   -webkit-justify-content: center;
-  //           justify-content: center;
-
-  //   background-color: white;
-  //   opacity: 0.85;
-  // }
 </style>

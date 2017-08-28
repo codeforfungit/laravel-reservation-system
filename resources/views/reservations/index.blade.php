@@ -46,3 +46,14 @@
   </div>
 </div>
 @endsection
+
+@section('script')
+  @if(isset($message) && isset(${alert-type}))
+  <script>
+    vm.$message({
+      message: {{ $message }},
+      type: {{ ${alert-type} }}
+    })
+  </script>
+  @endif
+@endsection

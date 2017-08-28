@@ -163,15 +163,30 @@ export default {
     },
 
     sendReserve () {
+      this.$startLoading()
       this.$http.post('/reservations/' + this.plan.id, {
         start: this.reservedStartDateTime,
         end: this.reservedEndDateTime,
         equipment: this.checkedEquipment
       }).then(res => {
-        // console.log(res)
-        window.location.href = '/reservations';
+        if ((/success/i).test(res.data['alert-type'])) {
+          this.$message({
+            message: res.data.message,
+            type: res.data['alert-type']
+          })
+          window.location.href = '/reservations';
+        } else {
+          throw { message: res.data.message }
+        }
       }).catch(err => {
         console.error(err)
+        this.$message({
+          message: err.message,
+          type: 'error'
+        })
+        location.reload();
+      }).then(() => {
+        this.$stopLoading()
       })
     }
 

@@ -20,7 +20,6 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/classrooms', 'ClassroomController@index')->name('classrooms');
-
 Route::get('/classrooms/{id}', 'ClassroomController@show')->name('showClassroom');
 
 Route::get('/reservations', 'ReservationController@index')->middleware('auth')->name('reservations');

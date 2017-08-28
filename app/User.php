@@ -6,6 +6,9 @@ use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+use App\Reservation;
+use App\Vocation;
+
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
@@ -33,6 +36,15 @@ class User extends Authenticatable
     }
 
     public function reserve (Reservation $reservation) {
+        if (Reservation::whereBetween('start', [$reservation->start, $reservation->end])->orWhereBetween('end', [$reservation->start, $reservation->end])->count() > 0) {
+            return null;
+        }
+
+        if (Vocation::where('start', '<=', $reservation->start)->where('end', '>=', $reservation->start)->count() > 0 || 
+            Vocation::where('start', '<=', $reservation->end)->where('end', '>=', $reservation->end)->count() > 0) {
+                return null;
+        }
+
         return $this->reservations()->save($reservation);
     }
 }

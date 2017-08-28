@@ -26,6 +26,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        $schedule->call(function () {
+            DB::table('reservations')->where('status', 'pending')->where('updated_at', '<', Carbon\Carbon::now()->addDay(-1))->update(['status' => 'cancel']);
+        })->hourly();
     }
 
     /**

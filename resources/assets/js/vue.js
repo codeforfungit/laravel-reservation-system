@@ -24,7 +24,21 @@ if (!window.axios) {
 }
 window.Vue.prototype.$http = window.axios
 
-const app = new Vue({
+window.Vue.prototype.$startLoading = function () {
+    this.$loadingInstance = this.$loading({ 
+        fullscreen: true,
+        lock: true,
+        text: 'LOADING...',
+    })
+    return this.$loadingInstance
+}
+
+window.Vue.prototype.$stopLoading = function (loadingInstance = null) {
+    loadingInstance = loadingInstance || this.$loadingInstance
+    loadingInstance.close()
+}
+
+window.vm = new Vue({
     el: '#app',
 
     components: {
