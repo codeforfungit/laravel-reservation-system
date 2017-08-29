@@ -18,7 +18,11 @@ class EventServiceProvider extends ServiceProvider
         ],
 
         'App\Events\ReservationPaid' => [
-            'App\Listeners\SendNotification'
+            'App\Listeners\SendPaidNotification'
+        ],
+
+        'App\Events\ReservationMade' => [
+            'App\Listeners\SendMadeNotification'
         ]
     ];
 

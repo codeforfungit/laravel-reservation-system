@@ -10,10 +10,6 @@ use App\Classroom;
 use App\Plan;
 use App\Equipment;
 
-use GuzzleHttp\Pool;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request as GuzzleRequest;
-
 class ReservationController extends Controller
 {
     /**
@@ -69,7 +65,6 @@ class ReservationController extends Controller
             }
         }
         
-        \Debugbar::info(compact('classroom', 'plan', 'reservations'));
         return view('reservations.create', compact('classroom', 'plan', 'reservations', 'vocations', 'equipment'));
     }
 
@@ -97,22 +92,15 @@ class ReservationController extends Controller
         }
         $price += $plan->price;
 
-        $reservation = auth()->user()->reserve(new Reservation([
-            'plan_id' => $planId,
-            'price' => $price,
-            'start' => Carbon::createFromTimestamp(request('start')),
-            'end' => Carbon::createFromTimestamp(request('end'))
-        ]));
-
-        if ($reservation === null) {
-            return [
-                'message' => 'Error With Making Reservation',
-                'alert-type' => 'error'
-            ];
-        } else {
-            // 增加設備至pivot table
+        try {
+            $reservation = auth()->user()->reserve(new Reservation([
+                'plan_id' => $planId,
+                'price' => $price,
+                'start' => Carbon::createFromTimestamp(request('start')),
+                'end' => Carbon::createFromTimestamp(request('end'))
+            ]));
             $reservation->equipment()->attach(request('equipment'));
-
+            event(new \App\Events\ReservationMade($reservation));                        
             if (request()->ajax()) {
                 return [
                     'reservation' => $reservation,
@@ -127,6 +115,11 @@ class ReservationController extends Controller
                         'alert-type' => 'success',
                     ]);
             }
+        } catch (\Exception $e) {
+            return [
+                'message' => $e->getMessage(),
+                'alert-type' => 'error'
+            ];
         }
     }
 
@@ -175,15 +168,29 @@ class ReservationController extends Controller
         //
     }
 
-    public function paid () {
-        $client = new Client();
-        $request = new GuzzleRequest("POST", "https://hooks.slack.com/services/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",
-        [
-            "Content-Type" => "application/json; charset=utf-8"
-        ],
-        "{\"text\":\"this is a book\"}");
+    public function pay (Reservation $reservation) {
+        return view('reservations.pay')->with(compact([
+            'reservation'
+        ]));
+    }
 
-        $response = $client->send($request);
-        return "Response HTTP : " . $response->getStatusCode();
+    public function paid (Reservation $reservation) {
+        // 檢查此request是否為正確的金流方資訊
+        if (true) {
+            $reservation->status = 'paid';
+            $reservation->save();
+            event(new \App\Events\ReservationPaid($reservation));                        
+            return $reservation;
+        } else {
+            return;
+        }
+    }
+
+    function create_mpg_aes_Encrypt ($parameter = "" , $key = "PKTeWwtNOXH6Q9Q1Qi4zaj3wjUtK956Z", $iv = "PZdLwHzkEgruqhvg") {
+        $return_str = '';
+        if (!empty($parameter)) {
+            $return_str = http_build_query($parameter);
+        }
+        return trim(bin2hex(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, addpadding($return_str), MCRYPT_MODE_CBC, $iv)));
     }
 }

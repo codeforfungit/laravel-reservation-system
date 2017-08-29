@@ -10,13 +10,8 @@
 //使用自己改過的code
 import FlatPickr from '../lib/flatpickr' 
 import { zh } from 'flatpickr/dist/l10n/zh'
-import Spinner from 'vue-simple-spinner'
 
 export default {
-  components: {
-    Spinner
-  },
-
   props: {
     // 已設定為假日的日期, 應預選
     vocationCollections: {

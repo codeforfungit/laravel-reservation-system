@@ -17,4 +17,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/reservations/paid', 'ReservationController@paid');
+Route::post('/reservations/{reservation}/paid', 'ReservationController@paid')->name('paid');

@@ -43,7 +43,6 @@ export default {
   props: ['classroom', 'plan', 'reservations', 'vocations', 'equipment'],
 
   mounted () {
-    console.log(this.vocations)
     // 設定可預約時段
     this.sections = [{
       text: '早上(10:00~12:00)',
@@ -179,12 +178,14 @@ export default {
           throw { message: res.data.message }
         }
       }).catch(err => {
-        console.error(err)
         this.$message({
+          showClose: true,
+          duration: 0,
           message: err.message,
           type: 'error'
         })
-        location.reload();
+        // 直接重新整理頁面 (部分時間差的error可能可以藉此修復, 但使用者可能會沒注意到錯誤訊息)
+        // location.reload()
       }).then(() => {
         this.$stopLoading()
       })
