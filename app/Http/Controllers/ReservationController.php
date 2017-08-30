@@ -190,20 +190,36 @@ class ReservationController extends Controller
 
     public function paidNotify (Reservation $reservation) {
         \Log::info('收到金流付款通知!');
+
         // 檢查此request是否為正確的金流方資訊
-        if (true) {
+        
+        // 檢查TradeSha欄位是否符合SHA256加密規則
+        if (!MpgGatewayHelper::checkTradeSha(request('TradeSha'), request('TradeInfo'))) {
+            \Log::error('SHA檢查錯誤!');
+            return;
+        }
+
+        // 檢查TradeInfo欄位是否能以AES256解密
+        $plainJSON = MpgGatewayHelper::AESDecrypt(request('TradeInfo'));
+        if (!$plainJSON) {
+            \Log::error('AES檢查錯誤!');
+            return;
+        }
+
+        $plainObject = json_decode($plainJSON);
+        
+        if ($plainObject->Status === 'SUCCESS') {
             $reservation->status = 'paid';
             $reservation->save();
             event(new \App\Events\ReservationPaid($reservation));                        
             return $reservation;
         } else {
+            \Log::error('預約單ID: ' . $reservation->id . '付款失敗!');
             return;
         }
     }
 
     public function paidReturn (Reservation $reservation) {
-        \Debugbar::info(request());
-
         // $mpg = new MpgGatewayHelper(
         //     env('MPG_MODE')==='test',
         //     $reservation->id,
@@ -217,9 +233,6 @@ class ReservationController extends Controller
             return 'SHA檢查錯誤';
         }
 
-        \Debugbar::info(json_decode(
-            MpgGatewayHelper::AESDecrypt(request('TradeInfo'))
-        ));
         $plainObject = json_decode(MpgGatewayHelper::AESDecrypt(request('TradeInfo')));
         $status = $plainObject->Status;
         $message = $plainObject->Message;
