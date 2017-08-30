@@ -26,7 +26,7 @@ Route::get('/reservations', 'ReservationController@index')->middleware('auth')->
 Route::post('/reservations/{reservation}/paidreturn', 'ReservationController@paidReturn')->name('paidReturn');
 Route::get('/reservations/{planId}/create', 'ReservationController@create')->middleware('auth')->name('createReservation');
 Route::post('/reservations/{planId}', 'ReservationController@store')->middleware('auth');
-Route::get('/reservations/{reservation}/pay', 'ReservationController@pay')->name('pay');
+Route::get('/reservations/{reservation}/pay', 'ReservationController@pay')->middleware('auth')->name('pay');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();

@@ -37,7 +37,11 @@
             </td>
             <td>{{ $reservation->start }}</td>
             <td>{{ $reservation->price }}</td>
-            <td>{{ $reservation->status }}</td>
+            @if($reservation->status === 'pending')
+              <td><a href="{{ route('pay', $reservation->id) }}">{{ $reservation->status }}</a></td>
+            @else
+              <td>{{ $reservation->status }}</td>
+            @endif
           </tr>
           @endforeach
         </table>
