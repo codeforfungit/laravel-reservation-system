@@ -189,7 +189,7 @@ class ReservationController extends Controller
     }
 
     public function paidNotify (Reservation $reservation) {
-        Log::info('收到金流付款通知!');
+        \Log::info('收到金流付款通知!');
         // 檢查此request是否為正確的金流方資訊
         if (true) {
             $reservation->status = 'paid';
