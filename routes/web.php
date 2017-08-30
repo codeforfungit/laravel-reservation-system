@@ -23,6 +23,7 @@ Route::get('/classrooms', 'ClassroomController@index')->name('classrooms');
 Route::get('/classrooms/{id}', 'ClassroomController@show')->name('showClassroom');
 
 Route::get('/reservations', 'ReservationController@index')->middleware('auth')->name('reservations');
+Route::post('/reservations/{reservation}/paidreturn', 'ReservationController@paidReturn')->name('paidReturn');
 Route::get('/reservations/{planId}/create', 'ReservationController@create')->middleware('auth')->name('createReservation');
 Route::post('/reservations/{planId}', 'ReservationController@store')->middleware('auth');
 Route::get('/reservations/{reservation}/pay', 'ReservationController@pay')->name('pay');

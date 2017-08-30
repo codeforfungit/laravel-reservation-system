@@ -9,6 +9,7 @@ use App\Reservation;
 use App\Classroom;
 use App\Plan;
 use App\Equipment;
+use App\Helpers\MpgGatewayHelper;
 
 class ReservationController extends Controller
 {
@@ -169,12 +170,26 @@ class ReservationController extends Controller
     }
 
     public function pay (Reservation $reservation) {
+        $mpg = new MpgGatewayHelper(
+            env('MPG_MODE')==='test',
+            $reservation->id,
+            $reservation->price,
+            $reservation->plan->name,
+            $reservation->user->email,
+            implode(', ', $reservation->equipment->pluck('name')->all())
+        );
+        $postData = $mpg->getPostData();
+        $postURL = $mpg->getPostURL();
+
         return view('reservations.pay')->with(compact([
-            'reservation'
+            'reservation',
+            'postData',
+            'postURL'
         ]));
     }
 
-    public function paid (Reservation $reservation) {
+    public function paidNotify (Reservation $reservation) {
+        Log::info('收到金流付款通知!');
         // 檢查此request是否為正確的金流方資訊
         if (true) {
             $reservation->status = 'paid';
@@ -186,11 +201,35 @@ class ReservationController extends Controller
         }
     }
 
-    function create_mpg_aes_Encrypt ($parameter = "" , $key = "PKTeWwtNOXH6Q9Q1Qi4zaj3wjUtK956Z", $iv = "PZdLwHzkEgruqhvg") {
-        $return_str = '';
-        if (!empty($parameter)) {
-            $return_str = http_build_query($parameter);
+    public function paidReturn (Reservation $reservation) {
+        \Debugbar::info(request());
+
+        // $mpg = new MpgGatewayHelper(
+        //     env('MPG_MODE')==='test',
+        //     $reservation->id,
+        //     $reservation->price,
+        //     $reservation->plan->name,
+        //     $reservation->user->email,
+        //     implode(', ', $reservation->equipment->pluck('name')->all())
+        // );
+
+        if (!MpgGatewayHelper::checkTradeSha(request('TradeSha'), request('TradeInfo'))) {
+            return 'SHA檢查錯誤';
         }
-        return trim(bin2hex(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, addpadding($return_str), MCRYPT_MODE_CBC, $iv)));
+
+        \Debugbar::info(json_decode(
+            MpgGatewayHelper::AESDecrypt(request('TradeInfo'))
+        ));
+        $plainObject = json_decode(MpgGatewayHelper::AESDecrypt(request('TradeInfo')));
+        $status = $plainObject->Status;
+        $message = $plainObject->Message;
+        $resule = $plainObject->Result;
+
+        return view('reservations.paidreturn')->with(compact([
+            'reservation',
+            'status',
+            'message'
+        ]));
+        return json_decode(MpgGatewayHelper::AESDecrypt(request('TradeInfo')));
     }
 }
