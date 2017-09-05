@@ -39,6 +39,7 @@
 </template>
 
 <<script>
+// 前臺的預約頁面元件
 export default {
   props: ['classroom', 'plan', 'reservations', 'vocations', 'equipment'],
 

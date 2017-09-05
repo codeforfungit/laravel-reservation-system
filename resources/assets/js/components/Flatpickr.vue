@@ -5,9 +5,8 @@
 </template>
 
 <script>
-// import FlatPickr from 'flatpickr'
-
-//使用自己改過的code
+// 後臺的假日管理月曆元件, 注意這個Flatpickr有修改過code
+// 使用自己改過的code
 import FlatPickr from '../lib/flatpickr' 
 import { zh } from 'flatpickr/dist/l10n/zh'
 
