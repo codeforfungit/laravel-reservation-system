@@ -176,6 +176,7 @@ var VoyagerMedia = function(o){
 		});
 
 		$('#delete').click(function(){
+			console.log('delete!')
 			if(manager.selected_file.type == 'directory'){
 				$('.folder_warning').show();
 			} else {
@@ -186,8 +187,58 @@ var VoyagerMedia = function(o){
 		});
 
 		$('#confirm_delete').click(function(){
-
 			$.post(options.baseUrl+'/media/delete_file_folder', { folder_location: manager.folders, file_folder: manager.selected_file.name, type: manager.selected_file.type, _token: CSRF_TOKEN }, function(data){
+				if(data.success == true){
+					toastr.success('successfully deleted ' + manager.selected_file.name, "Sweet Success!");
+					getFiles(manager.folders);
+					$('#confirm_delete_modal').modal('hide');
+				} else {
+					toastr.error(data.error, "Whoops!");
+				}
+			});
+		});
+
+		$('#crop').click(function(){
+			$('.confirm_crop_name').text(manager.selected_file.name);
+			document.getElementById('cropping-image').src = manager.selected_file.path
+			document.getElementById('img_name').value = manager.selected_file.name
+			document.getElementById('working_dir').value = '/' + manager.folders.join('/');			
+			$('#confirm_crop_modal').modal('show');
+
+			var croppingImage = document.getElementById('cropping-image');
+			if (window.cropper) {
+				window.cropper.replace(manager.selected_file.path)
+			} else {
+				window.cropper = new Cropper(croppingImage, {
+					aspectRatio: 16 / 9,
+					crop: function(e) {
+						console.log(e.detail)
+						document.getElementById('new-img-width').innerText = Math.round(e.detail.width) + 'px'
+						document.getElementById('new-img-height').innerText = Math.round(e.detail.height) + 'px'
+					}
+				})
+			}
+		});
+
+		$('#confirm_crop').click(function(){
+
+			// performLfmRequest('cropimage', {
+      //   img: $("#img").val(),
+      //   working_dir: $("#working_dir").val(),
+      //   dataX: $("#dataX").val(),
+      //   dataY: $("#dataY").val(),
+      //   dataHeight: $("#dataHeight").val(),
+      //   dataWidth: $("#dataWidth").val(),
+      //   type: $('#type').val()
+      // }).done(loadItems);
+
+			$.post(options.baseUrl+'/media/crop_image', { 
+				folder_location: manager.folders,
+				file_folder: manager.selected_file.name,
+				type: manager.selected_file.type,
+				_token: CSRF_TOKEN
+			}, function(data){
+				console.log(data)
 				if(data.success == true){
 					toastr.success('successfully deleted ' + manager.selected_file.name, "Sweet Success!");
 					getFiles(manager.folders);
