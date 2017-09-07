@@ -176,6 +176,7 @@ var VoyagerMedia = function(o){
 		});
 
 		$('#delete').click(function(){
+			console.log('delete!')
 			if(manager.selected_file.type == 'directory'){
 				$('.folder_warning').show();
 			} else {
@@ -186,7 +187,6 @@ var VoyagerMedia = function(o){
 		});
 
 		$('#confirm_delete').click(function(){
-
 			$.post(options.baseUrl+'/media/delete_file_folder', { folder_location: manager.folders, file_folder: manager.selected_file.name, type: manager.selected_file.type, _token: CSRF_TOKEN }, function(data){
 				if(data.success == true){
 					toastr.success('successfully deleted ' + manager.selected_file.name, "Sweet Success!");
@@ -197,6 +197,57 @@ var VoyagerMedia = function(o){
 				}
 			});
 		});
+
+		// Added By Shingo
+		// Crop Image
+		$('#crop').click(function(){
+			window.croppedData = {}
+			$('.confirm_crop_name').text(manager.selected_file.name);
+			document.getElementById('cropping-image').src = manager.selected_file.path
+			document.getElementById('img_name').value = manager.selected_file.name
+			document.getElementById('working_dir').value = '/' + manager.folders.join('/');			
+			$('#confirm_crop_modal').modal('show');
+
+			var croppingImage = document.getElementById('cropping-image');
+			if (window.cropper) {
+				window.cropper.replace(manager.selected_file.path)
+			} else {
+				window.cropper = new Cropper(croppingImage, {
+					aspectRatio: 16 / 9,
+					crop: function(e) {
+						document.getElementById('new-img-width').innerText = Math.round(e.detail.width) + 'px'
+						document.getElementById('new-img-height').innerText = Math.round(e.detail.height) + 'px'
+						window.croppedData = {
+							dataX: Math.round(e.detail.x),
+							dataY: Math.round(e.detail.y),
+							dataHeight: Math.round(e.detail.height),
+							dataWidth: Math.round(e.detail.width)
+						}
+					}
+				})
+			}
+		});
+
+		$('#confirm_crop').click(function(){
+			console.log(window.croppedData)
+			window.croppedData.img = manager.selected_file.name
+			window.croppedData.working_dir = '/' + manager.folders.join('/')
+
+			var postData = Object.assign(window.croppedData, {_token: CSRF_TOKEN})
+			console.log(postData)
+			
+			$.post(options.baseUrl+'/media/crop_image', postData, function(data){
+				console.log(data)
+				if(data.success == true){
+					toastr.success('successfully cropped ' + manager.selected_file.name, "Sweet Success!");
+					getFiles(manager.folders);
+					$('#confirm_crop_modal').modal('hide');
+				} else {
+					toastr.error(data.error, "Whoops!");
+				}
+			});
+		});
+		// End of Crop Image
 
 		$('#move').click(function(){
 			$('#move_file_modal').modal('show');

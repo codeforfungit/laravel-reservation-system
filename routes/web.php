@@ -28,6 +28,10 @@ Route::get('/reservations/{planId}/create', 'ReservationController@create')->mid
 Route::post('/reservations/{planId}', 'ReservationController@store')->middleware('auth');
 Route::get('/reservations/{reservation}/pay', 'ReservationController@pay')->middleware('auth')->name('pay');
 
-Route::group(['prefix' => 'admin'], function () {
+$adminPrefix = 'admin';
+Route::group(['prefix' => $adminPrefix], function () {
     Voyager::routes();
+    
+    // Admin Media Crop Image
+    Route::post('/media/crop_image', 'CustomMediaController@crop')->name('crop');
 });
