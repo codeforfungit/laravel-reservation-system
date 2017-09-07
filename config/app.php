@@ -178,8 +178,14 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         // custom service providers
+        // Voyager
         TCG\Voyager\VoyagerServiceProvider::class,
+
+        // Passport
         Laravel\Passport\PassportServiceProvider::class,
+
+        // For Image Cropping
+        Intervention\Image\ImageServiceProvider::class,
 
     ],
 
@@ -232,6 +238,9 @@ return [
         
         // Laravel Debugbar
         'Debugbar' => Barryvdh\Debugbar\Facade::class,
+
+        // Laravel File Manager
+        'Image' => Intervention\Image\Facades\Image::class,
     ],
 
 ];
